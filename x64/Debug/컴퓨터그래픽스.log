@@ -1,0 +1,22 @@
+﻿  main.c
+C:\Users\Ik9014\source\repos\컴퓨터그래픽스\컴퓨터그래픽스\main.c(22,14): warning C4305: '초기화 중': 'double'에서 'float'(으)로 잘립니다.
+C:\Users\Ik9014\source\repos\컴퓨터그래픽스\컴퓨터그래픽스\main.c(99,16): warning C4244: '함수': 'int'에서 'GLfloat'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\Ik9014\source\repos\컴퓨터그래픽스\컴퓨터그래픽스\main.c(99,34): warning C4244: '함수': 'int'에서 'GLfloat'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\Ik9014\source\repos\컴퓨터그래픽스\컴퓨터그래픽스\main.c(100,16): warning C4244: '함수': 'int'에서 'GLfloat'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\Ik9014\source\repos\컴퓨터그래픽스\컴퓨터그래픽스\main.c(100,33): warning C4244: '함수': 'int'에서 'GLfloat'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\Ik9014\source\repos\컴퓨터그래픽스\컴퓨터그래픽스\main.c(101,16): warning C4244: '함수': 'int'에서 'GLfloat'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\Ik9014\source\repos\컴퓨터그래픽스\컴퓨터그래픽스\main.c(101,33): warning C4244: '함수': 'int'에서 'GLfloat'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\Ik9014\source\repos\컴퓨터그래픽스\컴퓨터그래픽스\main.c(102,16): warning C4244: '함수': 'int'에서 'GLfloat'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\Ik9014\source\repos\컴퓨터그래픽스\컴퓨터그래픽스\main.c(102,34): warning C4244: '함수': 'int'에서 'GLfloat'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\Ik9014\source\repos\컴퓨터그래픽스\컴퓨터그래픽스\main.c(144,25): warning C4244: '초기화 중': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\Ik9014\source\repos\컴퓨터그래픽스\컴퓨터그래픽스\main.c(145,25): warning C4244: '초기화 중': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\Ik9014\source\repos\컴퓨터그래픽스\컴퓨터그래픽스\main.c(148,24): warning C4244: '초기화 중': 'double'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\Ik9014\source\repos\컴퓨터그래픽스\컴퓨터그래픽스\main.c(149,28): warning C4244: '초기화 중': 'double'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\Ik9014\source\repos\컴퓨터그래픽스\컴퓨터그래픽스\main.c(153,46): warning C4244: '초기화 중': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\Ik9014\source\repos\컴퓨터그래픽스\컴퓨터그래픽스\main.c(318,10): warning C4244: '=': 'double'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\Ik9014\source\repos\컴퓨터그래픽스\컴퓨터그래픽스\main.c(319,10): warning C4244: '=': 'double'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\Ik9014\source\repos\컴퓨터그래픽스\컴퓨터그래픽스\main.c(321,32): warning C4244: '=': 'double'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\Ik9014\source\repos\컴퓨터그래픽스\컴퓨터그래픽스\main.c(462,26): warning C4305: '=': 'double'에서 'float'(으)로 잘립니다.
+C:\Users\Ik9014\source\repos\컴퓨터그래픽스\컴퓨터그래픽스\main.c(496,21): warning C4113: 'void (__cdecl *)()'은(는) 'void (__cdecl *)(void)'과(와) 매개 변수 목록이 다릅니다.
+C:\Users\Ik9014\source\repos\컴퓨터그래픽스\컴퓨터그래픽스\main.c(509,18): warning C4113: 'void (__cdecl *)()'은(는) 'void (__cdecl *)(void)'과(와) 매개 변수 목록이 다릅니다.
+  컴퓨터그래픽스.vcxproj -> C:\Users\Ik9014\source\repos\컴퓨터그래픽스\x64\Debug\컴퓨터그래픽스.exe
