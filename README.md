@@ -15,3 +15,7 @@
 
 ### 초기버전 실행 화면
 https://github.com/user-attachments/assets/dc079d13-c651-4827-9e0b-89350bcfb8ad
+
+### 24.12.13-카메라 시점 변환 기능 추가 버전
+https://github.com/user-attachments/assets/0c6c9555-1783-43cc-84b8-bbd76d990d0d
+
