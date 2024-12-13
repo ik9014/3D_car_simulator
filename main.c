@@ -7,79 +7,81 @@
 const double PI = 3.14159265;
 
 static float angle = 0.0f, ratio;
-static float x = -10.0f, y = 0.09f, z = 0.0f;   // Ä«¸Ş¶ó À§Ä¡
-static float lx = 0.0f, ly = 0.0f, lz = 0.0f;   // Ä«¸Ş¶ó ½Ã¼± ¹æÇâ
+static float x = -10.0f, y = 0.09f, z = 0.0f;   // ì¹´ë©”ë¼ ìœ„ì¹˜
+static float lx = 0.0f, ly = 0.0f, lz = 0.0f;   // ì¹´ë©”ë¼ ì‹œì„  ë°©í–¥
 
-static int leftKey = 0;                 // ¿ŞÂÊ ¹æÇâÅ°¸¦ ´©¸£°í ÀÖ´ÂÁö
-static int rightKey = 0;                // ¿À¸¥ÂÊ ¹æÇâÅ°¸¦ ´©¸£°í ÀÖ´ÂÁö
-static float angleDegree = 1;           // È¸Àü ¹Î°¨µµ
-float carAngle = 0;                     // ÀÚµ¿Â÷ ¹æÇâ
+static int leftKey = 0;                 // ì™¼ìª½ ë°©í–¥í‚¤ë¥¼ ëˆ„ë¥´ê³  ìˆëŠ”ì§€
+static int rightKey = 0;                // ì˜¤ë¥¸ìª½ ë°©í–¥í‚¤ë¥¼ ëˆ„ë¥´ê³  ìˆëŠ”ì§€
+static float angleDegree = 1;           // íšŒì „ ë¯¼ê°ë„
+float carAngle = 0;                     // ìë™ì°¨ ë°©í–¥
 
-static int groundSize = 10000;          // ¹Ù´Ú Å©±â
+static int groundSize = 10000;          // ë°”ë‹¥ í¬ê¸°
 static int buildingRow = 5;
 static int buildingCol = 500;
-static int buildingHeight = 4; 
-static float roadLineWidth = 0.1;                  // µµ·Î¼± Æø
-static float roadLineLength = 10000;               // µµ·Î¼± ±æÀÌ
+static int buildingHeight = 4;
+static float roadLineWidth = 0.1;                  // ë„ë¡œì„  í­
+static float roadLineLength = 10000;               // ë„ë¡œì„  ê¸¸ì´
+
+static int viewMode = 1;
+static int tmp_viewMode;
+
+static int isMoving = 0;                // ìë™ì°¨ ì´ë™ ì—¬ë¶€
+static int isPressing = 0;              // í‚¤ë¥¼ ëˆ„ë¥´ê³  ìˆëŠ”ì§€ ì—¬ë¶€
+static int movingDirection = 1;         // ì´ë™ ë°©í–¥ (1: ì „ì§„, -1: í›„ì§„)
+static float speed = 0.1f;              // ì´ë™ ì†ë„
+static float maxSpeed = 1.3f;           // ìµœëŒ€ ì†ë„
+static float acceleration = 0.0005f;    // ê°€ì†ë„
+
+GLuint groundList, roadList, buildingList;  // ë””ìŠ¤í”Œë ˆì´ ë¦¬ìŠ¤íŠ¸
 
 
-static int isMoving = 0;                // ÀÚµ¿Â÷ ÀÌµ¿ ¿©ºÎ
-static int isPressing = 0;              // Å°¸¦ ´©¸£°í ÀÖ´ÂÁö ¿©ºÎ
-static int movingDirection = 1;         // ÀÌµ¿ ¹æÇâ (1: ÀüÁø, -1: ÈÄÁø)
-static float speed = 0.1f;              // ÀÌµ¿ ¼Óµµ
-static float maxSpeed = 1.3f;           // ÃÖ´ë ¼Óµµ
-static float acceleration = 0.0005f;    // °¡¼Óµµ
-
-GLuint groundList, roadList, buildingList;  // µğ½ºÇÃ·¹ÀÌ ¸®½ºÆ®
-
-
-// ·ºÀÌ ³Ê¹« ½ÉÇØ¼­ Æó±âÇÑ ÇÔ¼öµé
-// µğ½ºÇÃ·¹ÀÌ ¸®½ºÆ®·Î ´ëÃ¼ÇÏ¿´À½
+// ë ‰ì´ ë„ˆë¬´ ì‹¬í•´ì„œ íê¸°í•œ í•¨ìˆ˜ë“¤
+// ë””ìŠ¤í”Œë ˆì´ ë¦¬ìŠ¤íŠ¸ë¡œ ëŒ€ì²´í•˜ì˜€ìŒ
 /*
-// ¹Ù´ÚÀ» ±×¸®´Â ÇÔ¼ö
-// ¹Ù´Ú »çÀÌÁî¸¦ ÀÔ·Â¹Ş´Â´Ù
+// ë°”ë‹¥ì„ ê·¸ë¦¬ëŠ” í•¨ìˆ˜
+// ë°”ë‹¥ ì‚¬ì´ì¦ˆë¥¼ ì…ë ¥ë°›ëŠ”ë‹¤
 void drawGround(float groundSize) {
-    glColor3f(0.1f, 0.1f, 0.1f);    // È¸»ö
+    glColor3f(0.1f, 0.1f, 0.1f);    // íšŒìƒ‰
     glBegin(GL_QUADS);
-    glVertex3f(-groundSize, 0.0, -groundSize);  // ÁÂÃø ÇÏ´Ü
-    glVertex3f(groundSize, 0.0, -groundSize);   // ¿ìÃø ÇÏ´Ü
-    glVertex3f(groundSize, 0.0, groundSize);    // ¿ìÃø »ó´Ü
-    glVertex3f(-groundSize, 0.0, groundSize);   // ÁÂÃø »ó´Ü
+    glVertex3f(-groundSize, 0.0, -groundSize);  // ì¢Œì¸¡ í•˜ë‹¨
+    glVertex3f(groundSize, 0.0, -groundSize);   // ìš°ì¸¡ í•˜ë‹¨
+    glVertex3f(groundSize, 0.0, groundSize);    // ìš°ì¸¡ ìƒë‹¨
+    glVertex3f(-groundSize, 0.0, groundSize);   // ì¢Œì¸¡ ìƒë‹¨
     glEnd();
 }
 
 
-// µµ·Î¸¦ ±×¸®´Â ÇÔ¼ö
-// µµ·Î ÆøÀ» ÀÔ·Â¹Ş´Â´Ù
+// ë„ë¡œë¥¼ ê·¸ë¦¬ëŠ” í•¨ìˆ˜
+// ë„ë¡œ í­ì„ ì…ë ¥ë°›ëŠ”ë‹¤
 void drawRoad(float x, float z, float width) {
-    glColor3f(1.0f, 0.8f, 0.0f);    
-  
+    glColor3f(1.0f, 0.8f, 0.0f);
+
     glPushMatrix();
     glBegin(GL_QUADS);
-    glVertex3f(x, 0.01, -z);  // ÁÂÃø ÇÏ´Ü
-    glVertex3f(x + width, 0.01, -z);   // ¿ìÃø ÇÏ´Ü
-    glVertex3f(x + width, 0.01, z);    // ¿ìÃø »ó´Ü
-    glVertex3f(x, 0.01, z);   // ÁÂÃø »ó´Ü
+    glVertex3f(x, 0.01, -z);  // ì¢Œì¸¡ í•˜ë‹¨
+    glVertex3f(x + width, 0.01, -z);   // ìš°ì¸¡ í•˜ë‹¨
+    glVertex3f(x + width, 0.01, z);    // ìš°ì¸¡ ìƒë‹¨
+    glVertex3f(x, 0.01, z);   // ì¢Œì¸¡ ìƒë‹¨
     glEnd();
     glPopMatrix();
 }
 
 
-// °Ç¹°À» ±×¸®´Â ÇÔ¼ö
-// x¿Í zÁÂÇ¥, Å©±â, ³ôÀÌ¸¦ ÀÔ·Â¹Ş´Â´Ù
+// ê±´ë¬¼ì„ ê·¸ë¦¬ëŠ” í•¨ìˆ˜
+// xì™€ zì¢Œí‘œ, í¬ê¸°, ë†’ì´ë¥¼ ì…ë ¥ë°›ëŠ”ë‹¤
 void drawBuilding(float x, float z, float width, float height) {
 
-    // ·£´ıÇÏ°Ô °Ç¹° »öÀ» ÁöÁ¤ (ÁÂÇ¥ ±â¹İ)
+    // ëœë¤í•˜ê²Œ ê±´ë¬¼ ìƒ‰ì„ ì§€ì • (ì¢Œí‘œ ê¸°ë°˜)
     float rg = fmod(fabs(sin(x * 0.05 + z * 0.05)), 0.1f);          // 0.0 ~ 0.1
     float b = 0.2f + fmod(fabs(cos(x * 0.05 + z * 0.05)), 0.05f);   // 0.2 ~ 0.25
     glColor3f(rg, rg, b);
 
-    // ·£´ıÇÏ°Ô °Ç¹° ³ôÀÌ¸¦ ÁöÁ¤ (ÁÂÇ¥ ±â¹İ)
-    srand((int)(x + z));                    // °¢ ÁÂÇ¥¼­ Ç×»ó µ¿ÀÏÇÑ ³­¼ö »ı¼º
+    // ëœë¤í•˜ê²Œ ê±´ë¬¼ ë†’ì´ë¥¼ ì§€ì • (ì¢Œí‘œ ê¸°ë°˜)
+    srand((int)(x + z));                    // ê° ì¢Œí‘œì„œ í•­ìƒ ë™ì¼í•œ ë‚œìˆ˜ ìƒì„±
     float randomHeight = (rand() % 5 + 1); // 1~5
     float newHeight = height + randomHeight;
 
-    // °Ç¹° »ı¼º
+    // ê±´ë¬¼ ìƒì„±
     glPushMatrix();
     glTranslatef(x, newHeight / 2, z);
     glScalef(width, newHeight, width);
@@ -89,30 +91,30 @@ void drawBuilding(float x, float z, float width, float height) {
 */
 
 
-// µğ½ºÇÃ·¹ÀÌ ¸®½ºÆ® ÃÊ±âÈ­
+// ë””ìŠ¤í”Œë ˆì´ ë¦¬ìŠ¤íŠ¸ ì´ˆê¸°í™”
 void initDisplayLists() {
-    // ¹Ù´Ú µğ½ºÇÃ·¹ÀÌ ¸®½ºÆ® »ı¼º
+    // ë°”ë‹¥ ë””ìŠ¤í”Œë ˆì´ ë¦¬ìŠ¤íŠ¸ ìƒì„±
     groundList = glGenLists(1);
     glNewList(groundList, GL_COMPILE);
-    glColor3f(0.1f, 0.1f, 0.1f);    // È¸»ö
+    glColor3f(0.1f, 0.1f, 0.1f);    // íšŒìƒ‰
     glBegin(GL_QUADS);
-    glVertex3f(-groundSize, 0.0, -groundSize);  // ÁÂÃø ÇÏ´Ü
-    glVertex3f(groundSize, 0.0, -groundSize);   // ¿ìÃø ÇÏ´Ü
-    glVertex3f(groundSize, 0.0, groundSize);    // ¿ìÃø »ó´Ü
-    glVertex3f(-groundSize, 0.0, groundSize);   // ÁÂÃø »ó´Ü
+    glVertex3f(-groundSize, 0.0, -groundSize);  // ì¢Œì¸¡ í•˜ë‹¨
+    glVertex3f(groundSize, 0.0, -groundSize);   // ìš°ì¸¡ í•˜ë‹¨
+    glVertex3f(groundSize, 0.0, groundSize);    // ìš°ì¸¡ ìƒë‹¨
+    glVertex3f(-groundSize, 0.0, groundSize);   // ì¢Œì¸¡ ìƒë‹¨
     glEnd();
     glEndList();
 
-    // µµ·Î µğ½ºÇÃ·¹ÀÌ ¸®½ºÆ® »ı¼º
+    // ë„ë¡œ ë””ìŠ¤í”Œë ˆì´ ë¦¬ìŠ¤íŠ¸ ìƒì„±
     roadList = glGenLists(1);
     glNewList(roadList, GL_COMPILE);
     float x = -15.0;
     glColor3f(1.0f, 0.8f, 0.0f);
     glBegin(GL_QUADS);
-    glVertex3f(x, 0.01f, -roadLineLength);  // ÁÂÃø ÇÏ´Ü
-    glVertex3f(x + roadLineWidth, 0.01f, -roadLineLength);  // ¿ìÃø ÇÏ´Ü
-    glVertex3f(x + roadLineWidth, 0.01f, roadLineLength);   // ¿ìÃø »ó´Ü
-    glVertex3f(x, 0.01f, roadLineLength);   // ÁÂÃø »ó´Ü
+    glVertex3f(x, 0.01f, -roadLineLength);  // ì¢Œì¸¡ í•˜ë‹¨
+    glVertex3f(x + roadLineWidth, 0.01f, -roadLineLength);  // ìš°ì¸¡ í•˜ë‹¨
+    glVertex3f(x + roadLineWidth, 0.01f, roadLineLength);   // ìš°ì¸¡ ìƒë‹¨
+    glVertex3f(x, 0.01f, roadLineLength);   // ì¢Œì¸¡ ìƒë‹¨
     glEnd();
 
     glColor3f(1.0f, 1.0f, 1.0f);
@@ -123,20 +125,20 @@ void initDisplayLists() {
 
     for (int i = -4; i <= 4; i++) {
         if (i == 0) continue;
-        for (float z = -roadLineLength; z < roadLineLength; z += whiteLineGap) { // °£°İ Æ÷ÇÔ ¹İº¹
+        for (float z = -roadLineLength; z < roadLineLength; z += whiteLineGap) { // ê°„ê²© í¬í•¨ ë°˜ë³µ
             glBegin(GL_QUADS);
-            glVertex3f(i * whiteLineLoc - 15.0f, 0.02f, z);  // ÁÂÃø ÇÏ´Ü
-            glVertex3f(i * whiteLineLoc - 15.0f + roadLineWidth, 0.02f, z);  // ¿ìÃø ÇÏ´Ü
-            glVertex3f(i * whiteLineLoc - 15.0f + roadLineWidth, 0.02f, z + 2.0f);   // ¿ìÃø »ó´Ü
-            glVertex3f(i * whiteLineLoc - 15.0f, 0.02f, z + 2.0f);   // ÁÂÃø »ó´Ü
+            glVertex3f(i * whiteLineLoc - 15.0f, 0.02f, z);  // ì¢Œì¸¡ í•˜ë‹¨
+            glVertex3f(i * whiteLineLoc - 15.0f + roadLineWidth, 0.02f, z);  // ìš°ì¸¡ í•˜ë‹¨
+            glVertex3f(i * whiteLineLoc - 15.0f + roadLineWidth, 0.02f, z + 2.0f);   // ìš°ì¸¡ ìƒë‹¨
+            glVertex3f(i * whiteLineLoc - 15.0f, 0.02f, z + 2.0f);   // ì¢Œì¸¡ ìƒë‹¨
             glEnd();
         }
     }
     glEndList();
 
-    
 
-    // °Ç¹° µğ½ºÇÃ·¹ÀÌ ¸®½ºÆ® »ı¼º
+
+    // ê±´ë¬¼ ë””ìŠ¤í”Œë ˆì´ ë¦¬ìŠ¤íŠ¸ ìƒì„±
     buildingList = glGenLists(1);
     glNewList(buildingList, GL_COMPILE);
     for (int i = -buildingRow; i <= buildingRow; ++i) {
@@ -144,12 +146,12 @@ void initDisplayLists() {
             float x = i * 30;
             float z = j * 20;
 
-            // ·£´ı »ö»ó ÁöÁ¤
+            // ëœë¤ ìƒ‰ìƒ ì§€ì •
             float rg = fmod(fabs(sin(x * 0.05 + z * 0.05)), 0.1f);          // 0.0 ~ 0.1
             float b = 0.2f + fmod(fabs(cos(x * 0.05 + z * 0.05)), 0.05f);   // 0.2 ~ 0.25
             glColor3f(rg, rg, b);
 
-            srand((int)(x + z));                  
+            srand((int)(x + z));
             float randomHeight = (rand() % 5 + 1); // 1~5
             float newHeight = buildingHeight + randomHeight;
 
@@ -164,7 +166,7 @@ void initDisplayLists() {
 }
 
 
-// ÀÚµ¿Â÷¸¦ ±×¸®´Â ÇÔ¼ö
+// ìë™ì°¨ë¥¼ ê·¸ë¦¬ëŠ” í•¨ìˆ˜
 void drawCar() {
 
     float carX = x + lx;
@@ -172,92 +174,92 @@ void drawCar() {
     float carZ = z + lz;
 
     glPushMatrix();
-        glTranslatef(carX, carY, carZ);
-        glRotatef(carAngle, 0.0f, 1.0f, 0.0f);
+    glTranslatef(carX, carY, carZ);
+    glRotatef(carAngle, 0.0f, 1.0f, 0.0f);
 
-        // Â÷Ã¼ »ı¼º
-        glColor3f(1.0f, 0.8f, 0.0f);    // ³ë¶õ»ö
-        glPushMatrix();
-            glScalef(0.8f, 1.0f, 1.2f);
-            glutSolidCube(1.0);
-        glPopMatrix();
-                 
-        // Ã¢¹® »ı¼º (¾Õ)
-        glColor3f(0.3f, 0.7f, 1.0f);    // ÇÏ´Ã»ö
-        glPushMatrix();
-            glTranslatef(-0.18f, 0.32f, -0.555f);
-            glScalef(0.31f, 0.25f, 0.1f);
-            glutSolidCube(1.0);
-            glTranslatef(1.18f, 0.0f, 0.0f);
-            glutSolidCube(1.0);
-        glPopMatrix();
+    // ì°¨ì²´ ìƒì„±
+    glColor3f(1.0f, 0.8f, 0.0f);    // ë…¸ë€ìƒ‰
+    glPushMatrix();
+    glScalef(0.8f, 1.0f, 1.2f);
+    glutSolidCube(1.0);
+    glPopMatrix();
 
-        // Ã¢¹® »ı¼º (µÚ)
-        glColor3f(0.3f, 0.7f, 1.0f);    // ÇÏ´Ã»ö
-        glPushMatrix();
-            glTranslatef(0.0f, 0.32f, 0.555f);
-            glScalef(0.6f, 0.25f, 0.1f);
-            glutSolidCube(1.0);
-        glPopMatrix();
+    // ì°½ë¬¸ ìƒì„± (ì•)
+    glColor3f(0.3f, 0.7f, 1.0f);    // í•˜ëŠ˜ìƒ‰
+    glPushMatrix();
+    glTranslatef(-0.18f, 0.32f, -0.555f);
+    glScalef(0.31f, 0.25f, 0.1f);
+    glutSolidCube(1.0);
+    glTranslatef(1.18f, 0.0f, 0.0f);
+    glutSolidCube(1.0);
+    glPopMatrix();
 
-        // Ã¢¹® »ı¼º (Ãø¸é ÈÄ¹æ)
-        glPushMatrix();
-            glTranslatef(0.0f, 0.32f, 0.25f);
-            glScalef(0.805f, 0.25f, 0.5f);
-            glutSolidCube(1.0);
-        glPopMatrix();
-   
-        // Ã¢¹® »ı¼º (Ãø¸é Àü¹æ)
-        glPushMatrix();
-            glTranslatef(0.0f, 0.32f, -0.3f);
-            glScalef(0.805f, 0.25f, 0.3f);
-            glutSolidCube(1.0);
-        glPopMatrix();
+    // ì°½ë¬¸ ìƒì„± (ë’¤)
+    glColor3f(0.3f, 0.7f, 1.0f);    // í•˜ëŠ˜ìƒ‰
+    glPushMatrix();
+    glTranslatef(0.0f, 0.32f, 0.555f);
+    glScalef(0.6f, 0.25f, 0.1f);
+    glutSolidCube(1.0);
+    glPopMatrix();
+
+    // ì°½ë¬¸ ìƒì„± (ì¸¡ë©´ í›„ë°©)
+    glPushMatrix();
+    glTranslatef(0.0f, 0.32f, 0.25f);
+    glScalef(0.805f, 0.25f, 0.5f);
+    glutSolidCube(1.0);
+    glPopMatrix();
+
+    // ì°½ë¬¸ ìƒì„± (ì¸¡ë©´ ì „ë°©)
+    glPushMatrix();
+    glTranslatef(0.0f, 0.32f, -0.3f);
+    glScalef(0.805f, 0.25f, 0.3f);
+    glutSolidCube(1.0);
+    glPopMatrix();
     glPopMatrix();
 }
 
 
-// Ä«¸Ş¶ó¸¦ °»½ÅÇÏ´Â ÇÔ¼ö´Ù
+// ì¹´ë©”ë¼ë¥¼ ê°±ì‹ í•˜ëŠ” í•¨ìˆ˜ë‹¤
 void updateCamera(int cameraView[]) {
 
-    glLoadIdentity();           // ÇöÀç ¸ğµ¨-ºä Çà·ÄÀ» ÃÊ±âÈ­
+    glLoadIdentity();           // í˜„ì¬ ëª¨ë¸-ë·° í–‰ë ¬ì„ ì´ˆê¸°í™”
 
-    // ÀÚµ¿Â÷ÀÇ ¹æÇâÀ» ±âÁØÀ¸·Î Ä«¸Ş¶ó À§Ä¡¸¦ °è»ê
-    float offsetX = x + cameraView[2] * lx + cameraView[0] * (-lz); // ÁÂÇ¥ ±âÁØÀ¸·Î Ä«¸Ş¶ó À§Ä¡ Á¶Á¤
+    // ìë™ì°¨ì˜ ë°©í–¥ì„ ê¸°ì¤€ìœ¼ë¡œ ì¹´ë©”ë¼ ìœ„ì¹˜ë¥¼ ê³„ì‚°
+    float offsetX = x + cameraView[2] * lx + cameraView[0] * (-lz); // ì¢Œí‘œ ê¸°ì¤€ìœ¼ë¡œ ì¹´ë©”ë¼ ìœ„ì¹˜ ì¡°ì •
     float offsetY = y + cameraView[1];
-    float offsetZ = z + cameraView[2] * lz + cameraView[0] * lx;    // ÁÂÇ¥ ±âÁØÀ¸·Î Ä«¸Ş¶ó À§Ä¡ Á¶Á¤
-                    
+    float offsetZ = z + cameraView[2] * lz + cameraView[0] * lx;    // ì¢Œí‘œ ê¸°ì¤€ìœ¼ë¡œ ì¹´ë©”ë¼ ìœ„ì¹˜ ì¡°ì •
+
 
     gluLookAt(
-        offsetX, offsetY, offsetZ,                // Ä«¸Ş¶ó À§Ä¡
-        x + lx, y + ly, z + lz, // Ä«¸Ş¶ó ½Ã¼± ¹æÇâ
+        offsetX, offsetY, offsetZ,                // ì¹´ë©”ë¼ ìœ„ì¹˜
+        x + lx, y + ly, z + lz, // ì¹´ë©”ë¼ ì‹œì„  ë°©í–¥
         0.0f, 1.0f, 0.0f);
 }
 
 
 void drawMap() {
     /*
-    drawGround(groundSize); // ¹Ù´Ú ·»´õ¸µ
+    drawGround(groundSize); // ë°”ë‹¥ ë Œë”ë§
 
     int buildingRow = 2;
     int buildingCol = 300;
-    for (int i = -buildingRow; i <= buildingRow; ++i) { // °Ç¹° ·»´õ¸µ
+    for (int i = -buildingRow; i <= buildingRow; ++i) { // ê±´ë¬¼ ë Œë”ë§
         for (int j = -buildingCol; j <= buildingCol; ++j) {
             drawBuilding(i * 30, j * 20, 1, 4);
-            drawRoad(-15.0, 100.0, 0.1);     // µµ·Î ·»´õ¸µ
+            drawRoad(-15.0, 100.0, 0.1);     // ë„ë¡œ ë Œë”ë§
         }
     }
     */
 
-    glCallList(groundList);   // ¹Ù´Ú
-    glCallList(roadList);     // µµ·Î
-    glCallList(buildingList); // °Ç¹°
+    glCallList(groundList);   // ë°”ë‹¥
+    glCallList(roadList);     // ë„ë¡œ
+    glCallList(buildingList); // ê±´ë¬¼
 }
 
 
-// ¿ø±Ù Åõ¿µÀ» ¼³Á¤ÇÏ´Â ÇÔ¼ö
+// ì›ê·¼ íˆ¬ì˜ì„ ì„¤ì •í•˜ëŠ” í•¨ìˆ˜
 void MyReshape(int x, int y, int width, int height, int fov, int cameraView[]) {
-    glViewport(x, y, width, height); // ÀüÃ¼ Ã¢ Å©±â
+    glViewport(x, y, width, height); // ì „ì²´ ì°½ í¬ê¸°
     ratio = 1.0f * width / height;
 
     glMatrixMode(GL_PROJECTION);
@@ -269,52 +271,87 @@ void MyReshape(int x, int y, int width, int height, int fov, int cameraView[]) {
 
 
 
-// OpenGL µğ½ºÇÃ·¹ÀÌ Äİ¹é ÇÔ¼ö
+// OpenGL ë””ìŠ¤í”Œë ˆì´ ì½œë°± í•¨ìˆ˜
 void MyDisplay() {
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // ¹öÆÛ ÃÊ±âÈ­
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // ë²„í¼ ì´ˆê¸°í™”
 
-    // Ã¢ Å©±â: 1280x720
+    // ì°½ í¬ê¸°: 1280x720
 
-    int cameraView[5][3] = {
-        {0,1,-10},     // ÈÄ¹æ¼¦ 
-        {0,1,10},     // Àü¹æ¼¦
-        {5,1,1},     // ÁÂÃøÃø¸é¼¦
-        {-5,1,1},     // ¿ìÃøÃø¸é¼¦
-        {0,20,0} };   // »ó´Ü¼¦
+    int cameraView[9][3] = {
+        {0,1,-10},      // ì „ë°©ìƒ· (1ë²ˆ)
+        {0,1,10},       // í›„ë°©ìƒ· (1ë²ˆ)
+        {5,1,1},        // ì¢Œì¸¡ì¸¡ë©´ìƒ· (1ë²ˆ)
+        {-5,1,1},       // ìš°ì¸¡ì¸¡ë©´ìƒ· (1ë²ˆ)
+        {0,20,0},       // ìƒë‹¨ìƒ· (1ë²ˆ)
+        {0,1,-10},      // ì „ë°©ìƒ· (2, 3ë²ˆ)
+        {0, 3, -10},    // ì „ë°©ìƒ· (4ë²ˆ)
+        {0,50,0},       // ìƒë‹¨ìƒ· (5ë²ˆ)
+        {0,1,10} };     // í›„ë°©ìƒ· (0ë²ˆ)
 
-    // ÇÏ´ÜºÎ (ÈÄ¹æ¼¦)
-    MyReshape(250, 0, 780, 150, 30, cameraView[0]);
-    drawMap();
-    drawCar();
+    if (viewMode == 1) {
+        // í•˜ë‹¨ë¶€ (í›„ë°©ìƒ·)
+        MyReshape(250, 0, 780, 150, 30, cameraView[0]);
+        drawMap();
+        drawCar();
 
-    // »ó´ÜºÎ (Àü¹æ¼¦)
-    MyReshape(250, 570, 780, 150, 30, cameraView[1]);
-    drawMap();
-    drawCar();
+        // ìƒë‹¨ë¶€ (ì „ë°©ìƒ·)
+        MyReshape(250, 570, 780, 150, 30, cameraView[1]);
+        drawMap();
+        drawCar();
 
-    // Ãø¸éºÎ (ÁÂÃøÃø¸é¼¦)
-    MyReshape(0, 0, 250, 720, 80, cameraView[2]);
-    drawMap();
-    drawCar();
+        // ì¸¡ë©´ë¶€ (ì¢Œì¸¡ì¸¡ë©´ìƒ·)
+        MyReshape(0, 0, 250, 720, 80, cameraView[2]);
+        drawMap();
+        drawCar();
 
-    // Ãø¸éºÎ (¿ìÃøÃø¸é¼¦)
-    MyReshape(1030, 0, 250, 720, 80, cameraView[3]);
-    drawMap();
-    drawCar();
+        // ì¸¡ë©´ë¶€ (ìš°ì¸¡ì¸¡ë©´ìƒ·)
+        MyReshape(1030, 0, 250, 720, 80, cameraView[3]);
+        drawMap();
+        drawCar();
 
-    // Áß¾ÓºÎ (»ó´Ü¼¦)
-    MyReshape(250, 150, 780, 420, 80, cameraView[4]);
-    drawMap();
-    drawCar();
-
-    glutSwapBuffers();  // ¹öÆÛ ±³È¯
+        // ì¤‘ì•™ë¶€ (ìƒë‹¨ìƒ·)
+        MyReshape(250, 150, 780, 420, 80, cameraView[4]);
+        drawMap();
+        drawCar();
+    }
+    // ì „ë°©ìƒ·
+    else if (viewMode == 2) {
+        MyReshape(0, 0, 1280, 720, 40, cameraView[5]);
+        drawMap();
+        drawCar();
+    }
+    // ì „ë°©ìƒ· (fov ì‚´ì§ ë†’ì¸ ë²„ì „)
+    else if (viewMode == 3) {
+        MyReshape(0, 0, 1280, 720, 60, cameraView[5]);
+        drawMap();
+        drawCar();
+    }
+    // ì „ë°©ìƒ· (ì¹´ë©”ë¼ yë¥¼ 1ë‹¨ê³„ ë†’ì¸ ë²„ì „)
+    else if (viewMode == 4) {
+        MyReshape(0, 0, 1280, 720, 60, cameraView[6]);
+        drawMap();
+        drawCar();
+    }
+    // ìƒë‹¨ìƒ·
+    else if (viewMode == 5) {
+        MyReshape(0, 0, 1280, 720, 60, cameraView[7]);
+        drawMap();
+        drawCar();
+    }
+    // í›„ë°©ìƒ·
+    else if (viewMode == 0) {
+        MyReshape(0, 0, 1280, 720, 40, cameraView[8]);
+        drawMap();
+        drawCar();
+    }
+    glutSwapBuffers();  // ë²„í¼ êµí™˜
 }
 
 
-// Ä«¸Ş¶ó ½Ã¾ß ¹æÇâ ¾÷µ¥ÀÌÆ® ÇÔ¼ö
-// °¢µµ¸¦ ÀÔ·Â¹Ş´Â´Ù
+// ì¹´ë©”ë¼ ì‹œì•¼ ë°©í–¥ ì—…ë°ì´íŠ¸ í•¨ìˆ˜
+// ê°ë„ë¥¼ ì…ë ¥ë°›ëŠ”ë‹¤
 void setTurningAngle(float ang) {
-    // ¹æÇâ ¾÷µ¥ÀÌÆ®
+    // ë°©í–¥ ì—…ë°ì´íŠ¸
     lx = sin(ang);
     lz = -cos(ang);
 
@@ -322,10 +359,10 @@ void setTurningAngle(float ang) {
 }
 
 
-// ÀÚµ¿Â÷ÀÇ ¹æÇâ ÀüÈ¯ Ã³¸® ÇÔ¼ö
+// ìë™ì°¨ì˜ ë°©í–¥ ì „í™˜ ì²˜ë¦¬ í•¨ìˆ˜
 void setDirection() {
     float angleDeg = 0.004f;
-    // ÁÂÈ¸Àü Å°°¡ ´­¸° °æ¿ì
+    // ì¢ŒíšŒì „ í‚¤ê°€ ëˆŒë¦° ê²½ìš°
     if (isMoving) {
         if (leftKey) {
             if (speed > 0.0f) {
@@ -338,7 +375,7 @@ void setDirection() {
             }
         }
 
-        // ¿ìÈ¸Àü Å°°¡ ´­¸° °æ¿ì
+        // ìš°íšŒì „ í‚¤ê°€ ëˆŒë¦° ê²½ìš°
         if (rightKey) {
             if (speed > 0.0f) {
                 if (isMoving == 1)
@@ -350,53 +387,53 @@ void setDirection() {
             }
         }
     }
-   
+
 }
 
 
-// ÀÚµ¿Â÷ÀÇ ¼Óµµ¸¦ Áõ°¡½ÃÅ°´Â ÇÔ¼ö
+// ìë™ì°¨ì˜ ì†ë„ë¥¼ ì¦ê°€ì‹œí‚¤ëŠ” í•¨ìˆ˜
 void speedUp() {
     if (speed < maxSpeed)
         speed += acceleration;
-    printf("speed= %.2f\n", speed);
+    printf("speed = %.2f, angleDegree = %d, isMoving = %d\n", speed, angleDegree, isMoving);
 }
 
 
-// °¨¼ÓÀ» Ã³¸®ÇÏ´Â ÇÔ¼ö
-// °¨¼Ó °è¼ö¸¦ ÀÔ·Â¹Ş´Â´Ù
+// ê°ì†ì„ ì²˜ë¦¬í•˜ëŠ” í•¨ìˆ˜
+// ê°ì† ê³„ìˆ˜ë¥¼ ì…ë ¥ë°›ëŠ”ë‹¤
 void slowDown(int degree) {
     if (speed > 0.01f) {
         speed -= acceleration * degree * 0.5f;
-        if (speed < 0.01f) { // ÃÖ¼Ò ¼Óµµ À¯Áö
+        if (speed < 0.01f) { // ìµœì†Œ ì†ë„ ìœ ì§€
             speed = 0.01f;
         }
     }
-    printf("speed= %.2f\n", speed);
+    printf("speed = %.2f, angleDegree = %d, isMoving = %d\n", speed, angleDegree, isMoving);
 }
 
 
-// ÀÚµ¿Â÷ÀÇ ÀÌµ¿ ·ÎÁ÷À» Ã³¸®ÇÏ´Â ÇÔ¼ö
+// ìë™ì°¨ì˜ ì´ë™ ë¡œì§ì„ ì²˜ë¦¬í•˜ëŠ” í•¨ìˆ˜
 void moving() {
-    // ¹æÇâ ¼³Á¤
+    // ë°©í–¥ ì„¤ì •
     setDirection();
 
-    // °¡¼Ó ¶Ç´Â °¨¼Ó Ã³¸®
-    if (isPressing) {
+    // ê°€ì† ë˜ëŠ” ê°ì† ì²˜ë¦¬
+    if (isPressing) { 
         if (isMoving == movingDirection) {
             speedUp();
         }
         else {
-            slowDown(6); // ºê·¹ÀÌÅ© È¿°ú
+            slowDown(6); // ë¸Œë ˆì´í¬ íš¨ê³¼
             if (speed <= 0.1f) {
-                isMoving = movingDirection; // ¹æÇâ ÀüÈ¯
+                isMoving = movingDirection; // ë°©í–¥ ì „í™˜
             }
         }
     }
     else {
-        slowDown(2); // °¨¼Ó
+        slowDown(2); // ê°ì†
     }
 
-    // À§Ä¡ ¾÷µ¥ÀÌÆ®
+    // ìœ„ì¹˜ ì—…ë°ì´íŠ¸
     if (speed > 0.0) {
         x += lx * speed * isMoving;
         z += lz * speed * isMoving;
@@ -409,103 +446,139 @@ void moving() {
 }
 
 
-// Æ¯¼ö Å° ÀÔ·ÂÀ» Ã³¸®ÇÏ´Â ÇÔ¼ö (¹æÇâÅ°)
+// íŠ¹ìˆ˜ í‚¤ ì…ë ¥ì„ ì²˜ë¦¬í•˜ëŠ” í•¨ìˆ˜ (ë°©í–¥í‚¤)
 void inputKey(int key, int x, int y) {
     switch (key) {
-    case GLUT_KEY_UP:       // ÀüÁø
-        isPressing = 1;     // »ç¿ëÀÚ°¡ Å°¸¦ ´©¸£°í ÀÖ´Â »óÅÂ
-        movingDirection = 1;// ÀÚµ¿Â÷°¡ ÀüÁøÇÏ°í ÀÖ´Ù
+    case GLUT_KEY_UP:       // ì „ì§„
+        isPressing = 1;     // ì‚¬ìš©ìê°€ í‚¤ë¥¼ ëˆ„ë¥´ê³  ìˆëŠ” ìƒíƒœ
+        movingDirection = 1;// ìë™ì°¨ê°€ ì „ì§„í•˜ê³  ìˆë‹¤
         break;
 
-    case GLUT_KEY_DOWN:     // ÈÄÁø
+    case GLUT_KEY_DOWN:     // í›„ì§„
         isPressing = 1;
         movingDirection = -1;
         break;
 
-    case GLUT_KEY_LEFT:     // ÁÂÈ¸Àü
+    case GLUT_KEY_LEFT:     // ì¢ŒíšŒì „
         leftKey = 1;
         break;
 
-    case GLUT_KEY_RIGHT:    // ¿ìÈ¸Àü
+    case GLUT_KEY_RIGHT:    // ìš°íšŒì „
         rightKey = 1;
         break;
     }
 }
 
 
-// Æ¯¼ö Å° ÇØÁ¦¸¦ Ã³¸®ÇÏ´Â ÇÔ¼ö (¹æÇâÅ°)
+// íŠ¹ìˆ˜ í‚¤ í•´ì œë¥¼ ì²˜ë¦¬í•˜ëŠ” í•¨ìˆ˜ (ë°©í–¥í‚¤)
 void releaseKey(int key, int x, int y) {
     switch (key) {
-    case GLUT_KEY_UP:        // ÀüÈÄÁø Å° ÇØÁ¦ ½Ã ºñÈ°¼ºÈ­
+    case GLUT_KEY_UP:        // ì „í›„ì§„ í‚¤ í•´ì œ ì‹œ ë¹„í™œì„±í™”
     case GLUT_KEY_DOWN:
         isPressing = 0;
         break;
 
-    case GLUT_KEY_LEFT:     // ÁÂÈ¸Àü Å° ÇØÁ¦ ½Ã È¸Àü »óÅÂ ÃÊ±âÈ­
+    case GLUT_KEY_LEFT:     // ì¢ŒíšŒì „ í‚¤ í•´ì œ ì‹œ íšŒì „ ìƒíƒœ ì´ˆê¸°í™”
         leftKey = 0;
         break;
 
-    case GLUT_KEY_RIGHT:    // ¿ìÈ¸Àü Å° ÇØÁ¦ ½Ã È¸Àü »óÅÂ ÃÊ±âÈ­
+    case GLUT_KEY_RIGHT:    // ìš°íšŒì „ í‚¤ í•´ì œ ì‹œ íšŒì „ ìƒíƒœ ì´ˆê¸°í™”
         rightKey = 0;
         break;
     }
 }
 
 
-// ÀÚµ¿Â÷ÀÇ È¸Àü ¹Î°¨µµ¸¦ Á¶ÀÛÇÏ´Â ÇÔ¼ö
+// ì¼ë°˜ í‚¤ ì…ë ¥ ì²˜ë¦¬ í•¨ìˆ˜
 void angleDeg(unsigned char key, int x, int y) {
     switch (key) {
+    // ê°ë„ ì¡°ì ˆ
     case 'w':
         angleDegree = 1.5;
         break;
     case 's':
         angleDegree = 0.2;
         break;
-    case 32: // Space (ºê·¹ÀÌÅ© ¿ªÇÒ)
+
+    // ë¸Œë ˆì´í¬
+    case 32: // space (ë¸Œë ˆì´í¬ ì—­í• )
         if (speed < 0.05)
             isMoving = 0;
+        break;
+
+    // ì¹´ë©”ë¼ ì‹œì  ì¡°ì ˆ
+    case '1':
+        viewMode = 1;
+        break;
+    case '2':
+        viewMode = 2;
+        break;
+    case '3':
+        viewMode = 3;
+        break;
+    case '4':
+        viewMode = 4;
+        break;
+    case '5':
+        viewMode = 5;
+        break;
+    case 'c':
+        if (viewMode != 0) {
+            tmp_viewMode = viewMode;
+        }
+        viewMode = 0;
         break;
     }
 }
 
 
-// ÀÚµ¿Â÷ÀÇ È¸Àü ¹Î°¨µµ¸¦ ÃÊ±âÈ­ÇÏ´Â ÇÔ¼ö
+// ì¼ë°˜ í‚¤ë¥¼ ë–¼ì—ˆì„ ë•Œì˜ ê²½ìš°ë¥¼ ì²˜ë¦¬í•˜ëŠ” í•¨ìˆ˜
 void releaseAngleDeg(unsigned char key, int x, int y) {
     switch (key) {
+    // í‚¤ë¥¼ ë–¼ì—ˆì„ ë•Œ ì›ë˜ ê°’ìœ¼ë¡œ ë³µê·€
     case 'w':
         angleDegree = 1;
         break;
     case 's':
         angleDegree = 1;
+        break;
+
+    // cë¥¼ ë–¼ì—ˆì„ ë•Œ ì›ë˜ ì‹œì ìœ¼ë¡œ ë³µê·€
+    case 'c':
+        viewMode = tmp_viewMode;
+        break;
     }
 }
 
 
-// ¸ŞÀÎ ÇÔ¼ö
+
+// ë©”ì¸ í•¨ìˆ˜
 int main(int argc, char** argv) {
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
-    glutInitWindowSize(1280, 720);          // À©µµ¿ì Ã¢ Å©±â
+    glutInitWindowSize(1280, 720);          // ìœˆë„ìš° ì°½ í¬ê¸°
     glutInitWindowPosition(730, 200);
-    glutCreateWindow("3D ÀÚµ¿Â÷ °ÔÀÓ");     // À©µµ¿ì Ã¢ Á¦¸ñ
+    glutCreateWindow("3D ìë™ì°¨ ê²Œì„");     // ìœˆë„ìš° ì°½ ì œëª©
 
-    glClearColor(0.5f, 0.7f, 1.0f, 1.0f);   // ÇÏ´Ã»ö
+    glClearColor(0.5f, 0.7f, 1.0f, 1.0f);   // í•˜ëŠ˜ìƒ‰
     glEnable(GL_DEPTH_TEST);
 
-    // Äİ¹é ÇÔ¼ö µî·Ï
+    // ì½œë°± í•¨ìˆ˜ ë“±ë¡
     glutDisplayFunc(MyDisplay);
 
-    initDisplayLists(); // µğ½ºÇÃ·¹ÀÌ ¸®½ºÆ® ÃÊ±âÈ­
+    initDisplayLists(); // ë””ìŠ¤í”Œë ˆì´ ë¦¬ìŠ¤íŠ¸ ì´ˆê¸°í™”
 
-    // Å° ÀÔ·Â Ã³¸®
+    // ë°©í–¥í‚¤ ì…ë ¥ ì²˜ë¦¬
     glutSpecialFunc(inputKey);
-    glutSpecialUpFunc(releaseKey);
+    glutSpecialUpFunc(releaseKey); 
+
+    // ê·¸ ì™¸ì˜ ì¼ë°˜í‚¤ ì…ë ¥ ì²˜ë¦¬
     glutKeyboardFunc(angleDeg);
     glutKeyboardUpFunc(releaseAngleDeg);
 
-    glutPostRedisplay(); // ÃÊ±â È­¸é °­Á¦ ·»´õ¸µ ¿äÃ»
+    glutPostRedisplay(); // ì´ˆê¸° í™”ë©´ ê°•ì œ ë Œë”ë§ ìš”ì²­
 
-    // ÀÚµ¿Â÷ ÀÌµ¿ ¹× È­¸é °»½Å Ã³¸®
+    // ìë™ì°¨ ì´ë™ ë° í™”ë©´ ê°±ì‹  ì²˜ë¦¬
     glutIdleFunc(moving);
 
     glutMainLoop();
